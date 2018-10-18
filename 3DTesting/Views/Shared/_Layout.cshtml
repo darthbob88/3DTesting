@@ -10,51 +10,69 @@
 </head>
 <body>
     <script src="https://threejs.org/build/three.js" type="text/javascript"></script>
+
+    <script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://threejs.org/examples/js/loaders/GLTFLoader.js" type="text/javascript"></script>
+    <script src="https://threejs.org/examples/js/WebGL.js" type="text/javascript"></script>
     <script type="text/javascript">
         var scene = new THREE.Scene();
-        var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.25, 20);
+        camera.position.set(-1.8, 0.9, 2.7);
 
-        var renderer = new THREE.WebGLRenderer();
+        var controls = new THREE.OrbitControls(camera);
+        controls.target.set(0, -0.2, -0.2);
+        controls.update();
+
+        var renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.gammaOutput = true;
         document.body.appendChild(renderer.domElement);
 
-        var geometry = new THREE.BoxGeometry(1, 1, 1);
-        var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-        var cube = new THREE.Mesh(geometry, material);
-        scene.add(cube);
+        //var geometry = new THREE.BoxGeometry(1, 1, 1);
+        //var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        //var cube = new THREE.Mesh(geometry, material);
+        //scene.add(cube);
 
-        camera.position.z = 5;
+        // envmap
+        var path = 'https://threejs.org/examples/textures/cube/Bridge2/';
+        var format = '.jpg';
+        var envMap = new THREE.CubeTextureLoader().load([
+            path + 'posx' + format, path + 'negx' + format,
+            path + 'posy' + format, path + 'negy' + format,
+            path + 'posz' + format, path + 'negz' + format
+        ]);
+        scene.background = envMap;
+        var light = new THREE.HemisphereLight(0xbbbbff, 0x444422);
+        light.position.set(0, 1, 0);
+        scene.add(light);
+
+        // model
+        var loader = new THREE.GLTFLoader();
+        loader.load('https://threejs.org/examples/models/gltf/DamagedHelmet/glTF/DamagedHelmet.gltf', function (gltf) {
+            gltf.scene.traverse(function (child) {
+                //if (child.isMesh) {
+                //    child.material.envMap = envMap;
+                //}
+            });
+            scene.add(gltf.scene);
+        }, undefined, function (e) {
+            console.error(e);
+        });
+
 
         function animate() {
             requestAnimationFrame(animate);
 
-            cube.rotation.x += 0.01;
-            cube.rotation.y += 0.01;
+            //cube.rotation.x += 0.01;
+            //cube.rotation.y += 0.01;
 
             renderer.render(scene, camera);
         }
         animate();
 
     </script>
-    <div class="navbar navbar-inverse navbar-fixed-top">
-        <div class="container">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                @Html.ActionLink("Application name", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
-            </div>
-            <div class="navbar-collapse collapse">
-                <ul class="nav navbar-nav">
-                    <li>@Html.ActionLink("Home", "Index", "Home")</li>
-                    <li>@Html.ActionLink("About", "About", "Home")</li>
-                    <li>@Html.ActionLink("Contact", "Contact", "Home")</li>
-                </ul>
-            </div>
-        </div>
-    </div>
+
     <div class="container body-content">
         @RenderBody()
         <hr />

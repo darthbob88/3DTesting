@@ -20,6 +20,7 @@
         camera.position.set(-1.8, 0.9, 2.7);
 
         var controls = new THREE.OrbitControls(camera);
+        controls.autoRotate = true;
         controls.target.set(0, -0.2, -0.2);
         controls.update();
 
@@ -63,9 +64,7 @@
 
         function animate() {
             requestAnimationFrame(animate);
-
-            //cube.rotation.x += 0.01;
-            //cube.rotation.y += 0.01;
+            controls.update();
 
             renderer.render(scene, camera);
         }
